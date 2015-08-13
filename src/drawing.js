@@ -34,4 +34,12 @@ function worldView(scale, centerX, centerY, canvas, context) {
         }
         this.context.stroke();
     };
+    this.drawBox = function (worldX, worldY, size) {
+        var c = this.worldToCanvas(worldX, worldY);
+        this.context.beginPath();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "black";
+        this.context.rect(c.x, c.y, size * this.scale, size * this.scale);
+        this.context.stroke();
+    };
 }
