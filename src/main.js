@@ -18,6 +18,9 @@ var backToMenuButton;
 var backToStationButton;
 var startNewWorldButton;
 
+var gameworldCancelButton;
+var buildButton;
+
 // Game Canvas
 var worldView;
 
@@ -90,6 +93,8 @@ var init = function () {
     backToMenuButton = document.getElementById("back-to-menu-btn");
     backToStationButton = document.getElementById("back-to-station-btn");
     startNewWorldButton = document.getElementById("start-new-world-btn");
+    gameworldCancelButton = document.getElementById("gameworld-cancel-btn");
+    buildButton = document.getElementById("build-btn");
 
     // Button Clicks
     clearButton.onclick = function () { curPlayer = new Player(); goToView();}
