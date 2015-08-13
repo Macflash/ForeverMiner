@@ -7,7 +7,7 @@ function worldView(scale, centerX, centerY, canvas, context) {
     this.context = context;
 
     this.worldToCanvas = function (worldX, worldY) {
-        return { x: this.scale * (worldx - (this.centerX)) + (this.canvas.width / 2), y: this.scale * (worldy - (this.centerY)) + (this.canvas.height / 2) };
+        return { x: this.scale * (worldX - (this.centerX)) + (this.canvas.width / 2), y: this.scale * (worldY - (this.centerY)) + (this.canvas.height / 2) };
     };
 
     this.drawCircle = function (radius, color, worldX, worldY) {

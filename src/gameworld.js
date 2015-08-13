@@ -1,11 +1,11 @@
 // JavaScript source code
-var TILESIZE = 10;
+var TILESIZE = 25;
 
 var Map = function (size) {
     this.tiles = [];
     this.size = size;
     for (var i = 0; i < size; i++) {
-        tiles[i] = [];
+        this.tiles[i] = [];
     }
     this.draw = function (c) {
         for (var i = 0; i < this.size; i++) {

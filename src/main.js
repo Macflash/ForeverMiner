@@ -18,14 +18,20 @@ var backToMenuButton;
 var backToStationButton;
 var startNewWorldButton;
 
+// Game Canvas
+var worldView;
+
 /* ------------------------------
             USER INFORMATION
    ------------------------------ */
 var curPlayer;
 
 
-var playWorld = function (num) {
-    alert("want to play world " + num);
+var playWorld = function (event) {
+    //console.log(event.target.value);
+    curPlayer.playing = event.target.value;
+    goToView("gameworld");
+    //alert("want to play world " + event);
 }
 
 var goToView = function (view) {
@@ -43,11 +49,12 @@ var goToView = function (view) {
             gameworldListDiv.innerHTML = "";
             for (var k in curPlayer.gameworlds) {
                 var newdiv = document.createElement("div");
-                var newbtn = document.createElement("input");
-                newbtn.type = "button";
-                newbtn.value = "Play";
-                newbtn.onclick = function () { playWorld(k); };
-                newdiv.textContent = "World " + k;
+                newdiv.textContent = "World " + k + " ";
+                var newbtn = document.createElement("button");
+                newbtn.value = k;
+                newbtn.textContent = "Play";
+                newbtn.id = "play-world-" + k;
+                newbtn.addEventListener("click", playWorld);
                 newdiv.appendChild(newbtn);
                 gameworldListDiv.appendChild(newdiv);
             }
@@ -55,6 +62,16 @@ var goToView = function (view) {
     }
     else if (view == "gameworld") {
         gameworldDiv.style.display = "block";
+        // if player is playing a game then we
+        // should probably start displaying it and playing it!
+        if (curPlayer.playing != null) {
+            console.log("should play game " + curPlayer.playing);
+            curPlayer.gameworlds[curPlayer.playing].draw(worldView);
+        }
+        else {
+            console.log("ERROR: we aren't playing a game! -> back to the station!");
+            goToView("station");
+        }
     }
 }
 
@@ -75,13 +92,17 @@ var init = function () {
     startNewWorldButton = document.getElementById("start-new-world-btn");
 
     // Button Clicks
+    clearButton.onclick = function () { curPlayer = new Player(); goToView();}
     playButton.onclick = function () { goToView("station") };
     backToMenuButton.onclick = function () { goToView("welcome") };
-    backToStationButton.onclick = function () { goToView("station") };
+    backToStationButton.onclick = function () { curPlayer.playing = null; goToView("station"); };
     startNewWorldButton.onclick = function () {
         if (curPlayer) { curPlayer.gameworlds.push(new Gameworld(15)); goToView("station"); }
         else { alert("no player!");}
     };
+    var canvas = document.getElementById("gameworld-canvas");
+    var context = canvas.getContext("2d");
+    worldView = new worldView(1,0,0, canvas, context);
 
     //this is where we would handle cookie stuff.... but for now lets ignore that!
     goToView();
