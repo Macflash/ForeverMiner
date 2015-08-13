@@ -183,6 +183,7 @@ var clickController = function (event) {
         console.log("tried to select another unit or unselect a unit");
     }
     console.log("click: " + event.x + "," + event.y);
+    console.log(event.target);
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         //check if there are enough resources to place a turret!
         curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(event.x, event.y));
