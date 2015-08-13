@@ -32,6 +32,10 @@ var Turret = function (x, y) {
     this.y = y;
     this.dir = 0;
     this.radius = Radius.TURRET;
+
+    this.draw = function (c) {
+        c.drawCircle("red", this.radius, this.x, this.y);
+    }
 }
 
 var Enemy = function (x, y) {
@@ -52,6 +56,7 @@ var Enemy = function (x, y) {
 var Miner = function (x, y) {
     // EXP AND LEVEL
     this.level = 0;
+    this.curHP = 1;
 
     // CORE STAT LEVELS
     this.speed = 1; // how fast it mines minerals

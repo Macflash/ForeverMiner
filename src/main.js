@@ -11,6 +11,9 @@ var interfaceDivs = [];
 
 var gameworldListDiv;
 
+var minerMoneyDiv;
+var minerHealthDiv;
+
 //  Buttons
 var playButton;
 var clearButton;
@@ -44,6 +47,8 @@ var goToActionState = function (event) {
         if (event.target.id == "build-btn") {
             console.log("time to build stuff!");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.BUILDING;
+            curPlayer.gameworlds[curPlayer.playing].building = new Turret(curMouseX, curMouseY);
+            console.log(curPlayer.gameworlds[curPlayer.playing].building);
         }
         else if (event.target.id == "gameworld-cancel-btn") {
             console.log("cancelled stuff!");
@@ -107,6 +112,13 @@ var goToView = function (view) {
     }
 }
 
+var RunCurrentGameWorld = function () {
+    curPlayer.gameworlds[curPlayer.playing].update(worldView, tstep);
+    minerHealthDiv.max = curPlayer.gameworlds[curPlayer.playing].miner.health;
+    minerHealthDiv.value = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
+    minerMoneyDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.money;
+}
+
 var init = function () {
     // Connect Interface Elements
     // Divs
@@ -115,6 +127,9 @@ var init = function () {
     gameworldDiv = document.getElementById("gameworld-div");
     interfaceDivs.push(welcomeDiv, stationDiv, gameworldDiv);
     gameworldListDiv = document.getElementById("gameworld-list-div");
+
+    minerMoneyDiv = document.getElementById("miner-money-div");
+    minerHealthDiv = document.getElementById("miner-health-div");
 
     // Buttons
     playButton = document.getElementById("play-btn");
@@ -160,6 +175,13 @@ var clickController = function (event) {
         console.log("tried to select another unit or unselect a unit");
     }
     console.log("click: " + event.x + "," + event.y);
+    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
+        //check if there are enough resources to place a turret!
+        curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(event.x, event.y));
+        curPlayer.gameworlds[curPlayer.playing].building = null;
+        curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
+        goToActionState();
+    }
 }
 
 // used for showing units before building
@@ -168,4 +190,8 @@ var curMouseY = 0;
 var hoverController = function (event) {
     curMouseX = event.x;
     curMouseY = event.y;
+    if (curPlayer.gameworlds[curPlayer.playing].building != null) {
+        curPlayer.gameworlds[curPlayer.playing].building.x = event.x;
+        curPlayer.gameworlds[curPlayer.playing].building.y = event.y;
+    }
 }

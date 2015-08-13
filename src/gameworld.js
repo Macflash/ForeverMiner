@@ -26,6 +26,8 @@ var Gameworld = function (size) {
     this.running = 0;
     this.lastPlayedTime = null;
     this.actionState = ActionState.NONE;
+    this.building = null;
+    this.selected = null;
 
     //place miner somewhere
     this.miner = new Miner(Math.random() * size * TILESIZE, Math.random() * size * TILESIZE);
@@ -36,11 +38,13 @@ var Gameworld = function (size) {
             var d = new Date();
             console.log("its been " + (d.getTime() - this.lastPlayedTime)/ 1000 + " seconds since you last played");
         }
-        this.running = setInterval(this.update(c, tstep), tstep);
+        this.update(c, tstep);
+        this.running = setInterval("RunCurrentGameWorld()", tstep);
     };
 
     this.stopPlaying = function () {
         if (this.running) {
+            console.log("stopped playing");
             clearInterval(this.running);
             this.lastPlayedTime = new Date().getTime();
             this.running = 0;
@@ -48,17 +52,27 @@ var Gameworld = function (size) {
         else { console.log("ERROR: This game was not running but tried to stop"); }
     };
 
+    this.catchUpToNow = function (curTime, tstep) {
+
+    };
+
+    this.updateUnits = function (tstep) {
+        //go through all the units and call their update functions
+    };
+
     this.update = function (c, tstep) {
         // tstep is the time to advance by
 
         //update the game world
+        this.updateUnits(tstep);
 
         //draw current gameworld
         this.draw(c);
-    }
+    };
 
     this.draw = function (c) {
         c.clear();
+
         //draw map
         this.map.draw(c);
 
@@ -68,11 +82,19 @@ var Gameworld = function (size) {
 
         //draw the miner
         this.miner.draw(c);
+        
+        // draw whats being built
+        if (this.actionState == ActionState.BUILDING) {
+            this.building.draw(c);
+        }
+        if (this.actionState == ActionState.SELECTED) {
+            this.selected.highlight(c); // this doesnt exist right now...
+        }
     };
 
     this.drawUnits = function (c, units) {
         for(var k in units){
-            k.draw(c);
+            units[k].draw(c);
         }
     };
 }
