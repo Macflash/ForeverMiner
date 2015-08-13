@@ -20,10 +20,18 @@
     <input type="button" value="Start New World" id="start-new-world-btn" />
     <input type="button" value="Back to Menu" id="back-to-menu-btn" />
   </div>
-  <div id="gameworld-div">
-    This is the current gameworld.
+  <div id="gameworld-div" style="clear:both;">
+    <div style="float:left;">
+    This is the current gameworld. <br>
     <canvas id="gameworld-canvas" tabindex="1" width="500" height="500"></canvas>
-    <div id="gameworld-controls-div"></div>
+    </div>
+    <div style="float:left;">
+    Controls: <br>
+    <div id="gameworld-controls-div">
+      <button id="build-btn">Build</button>
+      <button id="gameworld-cancel">Cancel</button>
+    </div>
+    <div style="float:left;">
     <input type="button" value="Back to Station" id="back-to-station-btn" />
   </div>
 </body>
