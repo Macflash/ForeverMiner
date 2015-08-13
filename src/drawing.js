@@ -6,11 +6,16 @@ function worldView(scale, centerX, centerY, canvas, context) {
     this.canvas = canvas;
     this.context = context;
 
+    this.clear = function () {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        //this.drawCircle(10, "black", 0, 0);
+    };
+
     this.worldToCanvas = function (worldX, worldY) {
         return { x: this.scale * (worldX - (this.centerX)) + (this.canvas.width / 2), y: this.scale * (worldY - (this.centerY)) + (this.canvas.height / 2) };
     };
 
-    this.drawCircle = function (radius, color, worldX, worldY) {
+    this.drawCircle = function (color, radius, worldX, worldY) {
         var c = this.worldToCanvas(worldX, worldY);
         this.context.beginPath();
         this.context.arc(c.x, c.y, radius * this.scale, 0, 2 * Math.PI, false);

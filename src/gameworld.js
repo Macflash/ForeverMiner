@@ -25,9 +25,26 @@ var Gameworld = function (size) {
     //place miner somewhere
     this.miner = new Miner(Math.random() * size * TILESIZE, Math.random() * size * TILESIZE);
 
+    this.update = function (t) {
+        // t is the time to advance by
+    }
+
     this.draw = function (c) {
+        c.clear();
         //draw map
         this.map.draw(c);
 
-    }
+        //draw units
+        this.drawUnits(c, this.enemies);
+        this.drawUnits(c, this.turrets);
+
+        //draw the miner
+        this.miner.draw(c);
+    };
+
+    this.drawUnits = function (c, units) {
+        for(var k in units){
+            k.draw(c);
+        }
+    };
 }

@@ -67,4 +67,7 @@ var Miner = function (x, y) {
     this.x = x;
     this.y = y;
     this.radius = Radius.MINER;
+    this.draw = function (c) {
+        c.drawCircle("gray", this.radius, this.x, this.y);
+    };
 }

@@ -102,7 +102,7 @@ var init = function () {
     };
     var canvas = document.getElementById("gameworld-canvas");
     var context = canvas.getContext("2d");
-    worldView = new worldView(1,0,0, canvas, context);
+    worldView = new worldView(1,250,250, canvas, context);
 
     //this is where we would handle cookie stuff.... but for now lets ignore that!
     goToView();
