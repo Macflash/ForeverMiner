@@ -21,7 +21,7 @@ var goToView = function (view) {
         interfaceDivs[k].style.display = "none";
     }
     if (view == null || view == "welcome") {
-        welomeDiv.style.display = "block";
+        welcomeDiv.style.display = "block";
     }
     else if(view == "station") {
         stationDiv.style.display = "block";
@@ -49,6 +49,8 @@ var init = function () {
     playButton.onclick = function () { goToView("station") };
     backToMenuButton.onclick = function () { goToView("welcome") };
     backToStationButton.onclick = function () { goToView("station") };
+
+    goToView();
 
     //this is where we would handle cookie stuff.... but for now lets ignore that!
 
