@@ -1,6 +1,8 @@
 // JavaScript source code
 var TILESIZE = 25;
 
+var ActionState = { NONE: "none", BUILDING: "building", SELECTED: "selected" };
+
 var Map = function (size) {
     this.tiles = [];
     this.size = size;
@@ -21,12 +23,38 @@ var Gameworld = function (size) {
     this.map = new Map(size);
     this.enemies = [];
     this.turrets = [];
+    this.running = 0;
+    this.lastPlayedTime = null;
+    this.actionState = ActionState.NONE;
 
     //place miner somewhere
     this.miner = new Miner(Math.random() * size * TILESIZE, Math.random() * size * TILESIZE);
 
-    this.update = function (t) {
-        // t is the time to advance by
+    this.startPlaying = function (c, tstep) {
+        if (this.lastPlayedTime != null) {
+            //run until we catch up or until the base is destroyed
+            var d = new Date();
+            console.log("its been " + (d.getTime() - this.lastPlayedTime)/ 1000 + " seconds since you last played");
+        }
+        this.running = setInterval(this.update(c, tstep), tstep);
+    };
+
+    this.stopPlaying = function () {
+        if (this.running) {
+            clearInterval(this.running);
+            this.lastPlayedTime = new Date().getTime();
+            this.running = 0;
+        }
+        else { console.log("ERROR: This game was not running but tried to stop"); }
+    };
+
+    this.update = function (c, tstep) {
+        // tstep is the time to advance by
+
+        //update the game world
+
+        //draw current gameworld
+        this.draw(c);
     }
 
     this.draw = function (c) {

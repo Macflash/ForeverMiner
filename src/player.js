@@ -9,5 +9,4 @@ var Player = function (name) {
     // Current game world details
     this.gameworlds = []; // all game worlds active - deactivate when miner is destroyed
     this.playing = null;  // the current game world that needs to be drawn and interacted with 
-
 }
