@@ -50,8 +50,6 @@ var init = function () {
     backToMenuButton.onclick = function () { goToView("welcome") };
     backToStationButton.onclick = function () { goToView("station") };
 
-    goToView();
-
     //this is where we would handle cookie stuff.... but for now lets ignore that!
 
 }
