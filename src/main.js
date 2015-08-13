@@ -35,14 +35,34 @@ var playWorld = function (event) {
     //console.log(event.target.value);
     curPlayer.playing = event.target.value;
     goToView("gameworld");
+    goToActionState();
     //alert("want to play world " + event);
 }
 
-var goToActionState = function (state) {
-    if (state == ActionState.NONE) {
-        //we should see the build button, or be able to click, no cancel button
+var goToActionState = function (event) {
+    if (event != null) {
+        if (event.target.id == "build-btn") {
+            console.log("time to build stuff!");
+            curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.BUILDING;
+        }
+        else if (event.target.id == "gameworld-cancel-btn") {
+            console.log("cancelled stuff!");
+            curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
+        }
+    }
+
+    // set up view for correct action state
+    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE) {
         gameworldCancelButton.style.display = "none";
         buildButton.style.display = "block";
+    }
+    else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
+        gameworldCancelButton.style.display = "block";
+        buildButton.style.display = "block";
+    }
+    else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
+        gameworldCancelButton.style.display = "block";
+        buildButton.style.display = "none";
     }
 }
 
@@ -114,6 +134,8 @@ var init = function () {
         if (curPlayer) { curPlayer.gameworlds.push(new Gameworld(15)); goToView("station"); }
         else { alert("no player!");}
     };
+    buildButton.addEventListener("click", goToActionState);
+    gameworldCancelButton.addEventListener("click", goToActionState);
 
     // Set up canvas and worldview
     var canvas = document.getElementById("gameworld-canvas");
@@ -128,6 +150,15 @@ var init = function () {
 }
 
 var clickController = function (event) {
+    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE) {
+        console.log("tried to select unit");
+    }
+    else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
+        console.log("tried to place unit");
+    }
+    else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
+        console.log("tried to select another unit or unselect a unit");
+    }
     console.log("click: " + event.x + "," + event.y);
 }
 
