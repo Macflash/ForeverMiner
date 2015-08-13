@@ -5,6 +5,16 @@
   <script type="text/javascript" src="src/gameworld.js"></script>
   <script type="text/javascript" src="src/main.js"></script>
 </head>
-<body>
-  Welcome to ForeverMiner. Check back for updates!
+<body onload="init()">
+  <div id="welcome_div">
+    Welcome to ForeverMiner. Check back for updates!
+    <input type="button" name="PLAY!" id="play_btn" />
+    <input type="button" name="CLEAR DATA" id="clear_btn" />
+  </div>
+  <div id="station_div">
+    This is your station.
+  </div>
+  <div id="gameworld_div">
+    <canvas id="maincanvas" tabindex="1" width="1000" height="500"></canvas>
+  </div>
 </body>
