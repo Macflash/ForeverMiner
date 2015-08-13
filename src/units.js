@@ -57,6 +57,7 @@ var Miner = function (x, y) {
     // EXP AND LEVEL
     this.level = 0;
     this.curHP = 1;
+    this.money = 0;
 
     // CORE STAT LEVELS
     this.speed = 1; // how fast it mines minerals

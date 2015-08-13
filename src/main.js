@@ -13,6 +13,8 @@ var gameworldListDiv;
 
 var minerMoneyDiv;
 var minerHealthDiv;
+var minerMoneyProg;
+var minerHealthProg;
 
 //  Buttons
 var playButton;
@@ -114,8 +116,12 @@ var goToView = function (view) {
 
 var RunCurrentGameWorld = function () {
     curPlayer.gameworlds[curPlayer.playing].update(worldView, tstep);
-    minerHealthDiv.max = curPlayer.gameworlds[curPlayer.playing].miner.health;
-    minerHealthDiv.value = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
+    minerHealthProg.max = curPlayer.gameworlds[curPlayer.playing].miner.health;
+    minerHealthProg.value = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
+    minerMoneyProg.max = curPlayer.gameworlds[curPlayer.playing].miner.money;
+    minerMoneyProg.value = curPlayer.gameworlds[curPlayer.playing].miner.storage * 100;
+
+    minerHealthDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.health;
     minerMoneyDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.money;
 }
 
@@ -130,6 +136,8 @@ var init = function () {
 
     minerMoneyDiv = document.getElementById("miner-money-div");
     minerHealthDiv = document.getElementById("miner-health-div");
+    minerMoneyProg = document.getElementById("miner-money-prog");
+    minerHealthProg = document.getElementById("miner-health-prog");
 
     // Buttons
     playButton = document.getElementById("play-btn");
