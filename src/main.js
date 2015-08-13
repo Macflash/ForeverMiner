@@ -78,11 +78,12 @@ var init = function () {
     playButton.onclick = function () { goToView("station") };
     backToMenuButton.onclick = function () { goToView("welcome") };
     backToStationButton.onclick = function () { goToView("station") };
-    startNewWorldButton.onclick = function () { curPlayer.gameworlds.push(new Gameworld(15)); goToView("station"); };
-
-    goToView();
+    startNewWorldButton.onclick = function () {
+        if (curPlayer) { curPlayer.gameworlds.push(new Gameworld(15)); goToView("station"); }
+        else { alert("no player!");}
+    };
 
     //this is where we would handle cookie stuff.... but for now lets ignore that!
-    curPlayer = new Player();
-
+    goToView();
+    curPlayer = new Player("tom");
 }
