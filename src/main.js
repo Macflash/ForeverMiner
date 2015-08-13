@@ -182,11 +182,11 @@ var clickController = function (event) {
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
         console.log("tried to select another unit or unselect a unit");
     }
-    console.log("click: " + event.x + "," + event.y);
-    console.log(event.target);
+    //console.log("click: " + event.x + "," + event.y);
+    //console.log(event.target.offsetLeft);
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         //check if there are enough resources to place a turret!
-        curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(event.x, event.y));
+        curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(event.x - event.target.offsetLeft, event.y - event.target.offsetTop));
         curPlayer.gameworlds[curPlayer.playing].building = null;
         curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
         goToActionState();
@@ -197,10 +197,10 @@ var clickController = function (event) {
 var curMouseX = 0;
 var curMouseY = 0;
 var hoverController = function (event) {
-    curMouseX = event.x;
-    curMouseY = event.y;
+    curMouseX = event.x - event.target.offsetLeft;
+    curMouseY = event.y - event.target.offsetTop;
     if (curPlayer.gameworlds[curPlayer.playing].building != null) {
-        curPlayer.gameworlds[curPlayer.playing].building.x = event.x;
-        curPlayer.gameworlds[curPlayer.playing].building.y = event.y;
+        curPlayer.gameworlds[curPlayer.playing].building.x = curMouseX;
+        curPlayer.gameworlds[curPlayer.playing].building.y = curMouseY;
     }
 }
