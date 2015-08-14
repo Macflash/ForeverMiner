@@ -48,3 +48,31 @@ function worldView(scale, centerX, centerY, canvas, context) {
         this.context.stroke();
     };
 }
+
+var Dist = function (e1, e2) {
+    return Math.sqrt(Math.pow(e1.x - e2.x, 2) + Math.pow(e1.y - e2.y, 2));
+}
+
+var DirFromXY = function (x, y) {
+    return Math.atan(y / x);
+}
+
+var XYFromDir = function (dir) {
+    return { x: Math.cos(dir), y: Math.sin(dir) };
+}
+
+var DirToTarget = function (e1, e2) {
+    if (e1.x < e2.x) {
+        return DirFromXY(e1.x - e2.x, e1.y - e2.y);
+    }
+    else {
+        return DirFromXY(e1.x - e2.x, e1.y - e2.y) + Math.PI;
+    }
+}
+
+var Collision = function (e1, e2) {
+    if (Dist(e1, e2) < (e1.radius + e2.radius)) {
+        return true;
+    }
+    else { return false; }
+}

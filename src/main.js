@@ -28,7 +28,7 @@ var buildButton;
 
 // Game Canvas
 var worldView;
-var targetFrameRate = 20;
+var targetFrameRate = 60;
 var tstep = 1000 / targetFrameRate;
 
 /* ------------------------------
@@ -47,13 +47,13 @@ var playWorld = function (event) {
 var goToActionState = function (event) {
     if (event != null) {
         if (event.target.id == "build-btn") {
-            console.log("time to build stuff!");
+            //console.log("time to build stuff!");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.BUILDING;
             curPlayer.gameworlds[curPlayer.playing].building = new Turret(curMouseX, curMouseY);
-            console.log(curPlayer.gameworlds[curPlayer.playing].building);
+            //console.log(curPlayer.gameworlds[curPlayer.playing].building);
         }
         else if (event.target.id == "gameworld-cancel-btn") {
-            console.log("cancelled stuff!");
+            //console.log("cancelled stuff!");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
         }
     }
@@ -116,12 +116,12 @@ var goToView = function (view) {
 
 var RunCurrentGameWorld = function () {
     curPlayer.gameworlds[curPlayer.playing].update(worldView, tstep);
-    minerHealthProg.max = curPlayer.gameworlds[curPlayer.playing].miner.health;
+    minerHealthProg.max = curPlayer.gameworlds[curPlayer.playing].miner.getMaxHealth();
     minerHealthProg.value = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
-    minerMoneyProg.max = curPlayer.gameworlds[curPlayer.playing].miner.money;
-    minerMoneyProg.value = curPlayer.gameworlds[curPlayer.playing].miner.storage * 100;
+    minerMoneyProg.value = curPlayer.gameworlds[curPlayer.playing].miner.money;
+    minerMoneyProg.max = curPlayer.gameworlds[curPlayer.playing].miner.getMaxMoney();
 
-    minerHealthDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.health;
+    minerHealthDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
     minerMoneyDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.money;
 }
 
@@ -173,8 +173,12 @@ var init = function () {
 }
 
 var clickController = function (event) {
+    var click = { x: (event.x - event.target.offsetLeft), y: (event.y - event.target.offsetTop), radius: 0 };
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE) {
         console.log("tried to select unit");
+        // go through and see if we clicked on any units!
+        var clicked = curPlayer.gameworlds[curPlayer.playing].checkClickCollision(click);
+        console.log(clicked);
     }
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         console.log("tried to place unit");
@@ -186,7 +190,16 @@ var clickController = function (event) {
     //console.log(event.target.offsetLeft);
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         //check if there are enough resources to place a turret!
-        curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(event.x - event.target.offsetLeft, event.y - event.target.offsetTop));
+        if (curPlayer.gameworlds[curPlayer.playing].miner.money >= 100) {
+            //check if it collides with anything!
+            if (curPlayer.gameworlds[curPlayer.playing].checkClickCollision(curPlayer.gameworlds[curPlayer.playing].building) == null) {
+                curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(click.x, click.y));
+                curPlayer.gameworlds[curPlayer.playing].miner.money -= 100;
+            }
+            else {
+                console.log("turret overlaps! can't build!");
+            }
+        }
         curPlayer.gameworlds[curPlayer.playing].building = null;
         curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
         goToActionState();

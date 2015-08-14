@@ -23,16 +23,20 @@ var Gameworld = function (size) {
     this.map = new Map(size);
     this.enemies = [];
     this.turrets = [];
+    this.projectiles = [];
     this.running = 0;
     this.lastPlayedTime = null;
     this.actionState = ActionState.NONE;
     this.building = null;
     this.selected = null;
+    this.lost = false;
+    this.depth = 0;
 
     //place miner somewhere
     this.miner = new Miner(Math.random() * size * TILESIZE, Math.random() * size * TILESIZE);
 
     this.startPlaying = function (c, tstep) {
+        if (this.lost) { return false; }
         if (this.lastPlayedTime != null) {
             //run until we catch up or until the base is destroyed
             var d = new Date();
@@ -53,11 +57,75 @@ var Gameworld = function (size) {
     };
 
     this.catchUpToNow = function (curTime, tstep) {
-
+        // toooooodoooooo
     };
 
     this.updateUnits = function (tstep) {
         //go through all the units and call their update functions
+
+        // enemies
+        // spawn chance is like depth / 1000000 kind of...
+        var r = Math.pow(.999, Math.log(this.depth + 1));
+        console.log(r);
+        if ( Math.random() > r) {
+            var tx = 0;
+            var ty = 0;
+            if (this.miner.x < .5 * TILESIZE * this.map.size) {
+                tx = TILESIZE * this.map.size;
+            }
+            if (this.miner.y < .5 * TILESIZE * this.map.size) {
+                ty = TILESIZE * this.map.size;
+            }
+
+            console.log("spawned enemy! " + tx + "," + ty);
+            this.enemies.push(new Enemy(tx, ty));
+        }
+        for (var e in this.enemies) {
+            this.enemies[e].update(tstep, this.miner);
+        }
+        // turrets
+        for (var t in this.turrets) {
+            var bullet = this.turrets[t].update(tstep, this.enemies);
+            if (bullet != null) {
+                this.projectiles.push(bullet);
+            }
+        }
+        // projectiles
+        for (var p in this.projectiles) {
+            this.projectiles[p].update(tstep);
+        }
+
+        // check collisions!
+        for (var p in this.projectiles) {
+            for (var e in this.enemies) {
+                if (Collision(this.projectiles[p], this.enemies[e])) {
+                    //console.log("collision!" + this.enemies[e].curHP);
+                    this.enemies[e].curHP -= this.projectiles[p].damage;
+                    this.projectiles.splice(p, 1);
+                    if (this.enemies[e].curHP <= 0) {
+                        //console.log("dead!");
+                        this.enemies.splice(e,1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        for (var e in this.enemies) {
+            if (Collision(this.miner, this.enemies[e])) {
+                this.miner.curHP -= this.enemies[e].damage * 10;
+                this.enemies.splice(e, 1);
+            }
+        }
+
+
+        // miner
+        this.depth = this.miner.update(tstep);
+        if (this.depth == -1) {
+            //the game is over!
+            this.lost = true;
+            this.stopPlaying();
+        }
     };
 
     this.update = function (c, tstep) {
@@ -77,12 +145,15 @@ var Gameworld = function (size) {
         this.map.draw(c);
 
         //draw units
-        this.drawUnits(c, this.enemies);
         this.drawUnits(c, this.turrets);
 
         //draw the miner
         this.miner.draw(c);
         
+        this.drawUnits(c, this.enemies);
+
+        this.drawUnits(c, this.projectiles);
+
         // draw whats being built
         if (this.actionState == ActionState.BUILDING) {
             this.building.draw(c);
@@ -97,4 +168,21 @@ var Gameworld = function (size) {
             units[k].draw(c);
         }
     };
+
+    this.checkClickCollision = function (click) {
+        if(Collision(click, this.miner)){
+            return this.miner;
+        }
+        for (var k in this.turrets) {
+            if (Collision(click, this.turrets[k])) {
+                return this.turrets[k];
+            }
+        }
+        for (var k in this.enemies) {
+            if (Collision(click, this.enemies[k])) {
+                return this.enemies[k];
+            }
+        }
+        return null;
+    }
 }
