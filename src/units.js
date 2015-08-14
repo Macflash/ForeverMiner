@@ -52,6 +52,9 @@ var Turret = function (x, y) {
     }
 
     this.draw = function (c) {
+        if (curPlayer.gameworlds[curPlayer.playing].selected == this) {
+            c.drawCircle("lightblue", this.radius + 3, this.x, this.y);
+        }
         c.drawCircle("green", this.radius, this.x, this.y);
     }
 
@@ -92,6 +95,9 @@ var Enemy = function (x, y) {
     this.curHP = 5;
 
     this.draw = function (c) {
+        if (curPlayer.gameworlds[curPlayer.playing].selected == this) {
+            c.drawCircle("lightblue", this.radius + 3, this.x, this.y);
+        }
         c.drawCircle("red", this.radius, this.x, this.y);
     }
 
@@ -132,6 +138,9 @@ var Miner = function (x, y) {
     this.y = y;
     this.radius = Radius.MINER;
     this.draw = function (c) {
+        if (curPlayer.gameworlds[curPlayer.playing].selected == this) {
+            c.drawCircle("lightblue", this.radius + 3, this.x, this.y);
+        }
         c.drawCircle("gray", this.radius, this.x, this.y);
     };
     this.getMaxMoney = function () {

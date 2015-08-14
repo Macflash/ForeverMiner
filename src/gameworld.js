@@ -66,7 +66,7 @@ var Gameworld = function (size) {
         // enemies
         // spawn chance is like depth / 1000000 kind of...
         var r = Math.pow(.999, Math.log(this.depth + 1));
-        console.log(r);
+        //console.log(r);
         if ( Math.random() > r) {
             var tx = 0;
             var ty = 0;
@@ -159,7 +159,7 @@ var Gameworld = function (size) {
             this.building.draw(c);
         }
         if (this.actionState == ActionState.SELECTED) {
-            this.selected.highlight(c); // this doesnt exist right now...
+            //this.selected.highlight(c); // this doesnt exist right now...
         }
     };
 

@@ -10,6 +10,7 @@ var gameworldDiv;
 var interfaceDivs = [];
 
 var gameworldListDiv;
+var selectedDiv;
 
 var minerMoneyDiv;
 var minerHealthDiv;
@@ -45,16 +46,20 @@ var playWorld = function (event) {
 }
 
 var goToActionState = function (event) {
+    selectedDiv.innerHTML = "";
     if (event != null) {
         if (event.target.id == "build-btn") {
             //console.log("time to build stuff!");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.BUILDING;
+            curPlayer.gameworlds[curPlayer.playing].selected = null;
             curPlayer.gameworlds[curPlayer.playing].building = new Turret(curMouseX, curMouseY);
             //console.log(curPlayer.gameworlds[curPlayer.playing].building);
         }
         else if (event.target.id == "gameworld-cancel-btn") {
             //console.log("cancelled stuff!");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
+            curPlayer.gameworlds[curPlayer.playing].building = null;
+            curPlayer.gameworlds[curPlayer.playing].selected = null;
         }
     }
 
@@ -66,6 +71,13 @@ var goToActionState = function (event) {
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
         gameworldCancelButton.style.display = "block";
         buildButton.style.display = "block";
+
+        //add in the info of the selected unit!
+        var keys = "";
+        for (var k in curPlayer.gameworlds[curPlayer.playing].selected) {
+            keys += k + " <br> ";
+        }
+        selectedDiv.innerHTML = keys;
     }
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         gameworldCancelButton.style.display = "block";
@@ -133,6 +145,7 @@ var init = function () {
     gameworldDiv = document.getElementById("gameworld-div");
     interfaceDivs.push(welcomeDiv, stationDiv, gameworldDiv);
     gameworldListDiv = document.getElementById("gameworld-list-div");
+    selectedDiv = document.getElementById("selected-div");
 
     minerMoneyDiv = document.getElementById("miner-money-div");
     minerHealthDiv = document.getElementById("miner-health-div");
@@ -174,21 +187,26 @@ var init = function () {
 
 var clickController = function (event) {
     var click = { x: (event.x - event.target.offsetLeft), y: (event.y - event.target.offsetTop), radius: 0 };
-    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE) {
+    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE || curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
         console.log("tried to select unit");
         // go through and see if we clicked on any units!
         var clicked = curPlayer.gameworlds[curPlayer.playing].checkClickCollision(click);
-        console.log(clicked);
+        //console.log(clicked);
+        if (clicked != null) {
+            curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.SELECTED;
+            curPlayer.gameworlds[curPlayer.playing].selected = clicked;
+            curPlayer.gameworlds[curPlayer.playing].building = null;
+            goToActionState();
+        }
+        else {
+            console.log("tried to unselect a unit");
+            curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
+            curPlayer.gameworlds[curPlayer.playing].selected = null;
+            goToActionState();
+        }
     }
+
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
-        console.log("tried to place unit");
-    }
-    else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
-        console.log("tried to select another unit or unselect a unit");
-    }
-    //console.log("click: " + event.x + "," + event.y);
-    //console.log(event.target.offsetLeft);
-    if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         //check if there are enough resources to place a turret!
         if (curPlayer.gameworlds[curPlayer.playing].miner.money >= 100) {
             //check if it collides with anything!
