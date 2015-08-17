@@ -73,11 +73,21 @@ var goToActionState = function (event) {
         buildButton.style.display = "block";
 
         //add in the info of the selected unit!
-        var keys = "";
-        for (var k in curPlayer.gameworlds[curPlayer.playing].selected) {
-            keys += k + " <br> ";
+        var temp = curPlayer.gameworlds[curPlayer.playing].selected;
+        for (var k in temp.upgradable) {
+            var newdiv = document.createElement("div");
+            newdiv.innerText = temp.upgradable[k] + ": " + temp[temp.upgradable[k]];
+            var newbtn = document.createElement("button");
+            newbtn.innerText = "+";
+            newbtn.id = "upgrade-btn-" + k;
+            newbtn.name = temp.upgradable[k];
+            newbtn.addEventListener("click", upgradeController);
+            newdiv.appendChild(newbtn);
+            selectedDiv.appendChild(newdiv);
         }
-        selectedDiv.innerHTML = keys;
+        // we need to make little divs for displaying and upgrading
+        // your stats
+        //selectedDiv.innerHTML = keys;
     }
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         gameworldCancelButton.style.display = "block";
@@ -178,11 +188,17 @@ var init = function () {
     canvas.addEventListener("click", clickController);
     canvas.addEventListener("mousemove", hoverController);
     var context = canvas.getContext("2d");
-    worldView = new worldView(1,250,250, canvas, context);
+    worldView = new worldView(1,200, 200, canvas, context);
 
     //this is where we would handle cookie stuff.... but for now lets ignore that!
     goToView();
     curPlayer = new Player("tom");
+}
+
+var upgradeController = function (event) {
+    console.log("upgrade: " + event.target.name);
+    curPlayer.gameworlds[curPlayer.playing].selected[event.target.name]++;
+    goToActionState();
 }
 
 var clickController = function (event) {

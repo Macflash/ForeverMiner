@@ -11,6 +11,8 @@ var Projectile = function (x, y, dir) {
     this.splash = 1;
     this.augment = null;
     this.radius = Radius.PROJECTILE;
+    this.upgradable = [];
+
     this.draw = function (c) {
         c.drawCircle("yellow", this.radius, this.x, this.y);
     }
@@ -31,6 +33,8 @@ var Turret = function (x, y) {
     this.precision = 1; //how far and accurate you shoot
     this.damage = 1; //how much you do to the first hit target
     this.splash = 1; //how big the splash is and how much it does
+
+    this.upgradable = ["speed", "precision", "damage", "splash"];
 
     this.curShotCounter = 0;
 
@@ -94,6 +98,8 @@ var Enemy = function (x, y) {
     this.radius = Radius.ENEMY;
     this.curHP = 5;
 
+    this.upgradable = [];
+
     this.draw = function (c) {
         if (curPlayer.gameworlds[curPlayer.playing].selected == this) {
             c.drawCircle("lightblue", this.radius + 3, this.x, this.y);
@@ -126,6 +132,8 @@ var Miner = function (x, y) {
     this.transfer = 1; // how fast it can transfer minerals to orbit
     this.health = 1;
     this.armor = 1;
+
+    this.upgradable = ["speed", "storage", "transfer", "health", "armor"];
 
     this.miningDepth = 1;
     this.curMiningProgress = 0;
