@@ -24,19 +24,14 @@
     <input type="button" value="Back to Menu" id="back-to-menu-btn" />
   </div>
   <div id="gameworld-div" style="clear:both;">
-    <div style="float:left;">
     This is the current gameworld. <br>
-    <canvas id="gameworld-canvas" tabindex="1" width="400" height="400"></canvas>
-    </div>
     
     <div style="float:left;">
       Miner: <br>
       Cash: <div id="miner-money-div"></div><progress id="miner-money-prog"></progress><br>
       HP: <div id="miner-health-div"></div><progress id="miner-health-prog"></progress><br>
       <br>
-      Selected: <br>
-      <div id="selected-div"></div><br>
-      <br>
+      
       Controls: <br>
       <div id="gameworld-controls-div">
         <button id="build-btn">Build</button>
@@ -44,5 +39,16 @@
         <input type="button" value="Back to Station" id="back-to-station-btn" />
       </div>
     </div>
+    
+    <div style="float:left;">
+    <canvas id="gameworld-canvas" tabindex="1" width="400" height="400"></canvas>
+    </div>
+    
+    <div style-="float:left;">
+      Selected: <br>
+      <div id="selected-div"></div><br>
+      <br>
+    </div>
+    
   </div>
 </body>
