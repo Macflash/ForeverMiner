@@ -19,6 +19,7 @@ var Map = function (size) {
 }
 
 var Gameworld = function (size) {
+    this.moneyToTransfer = 0;
     this.currentTime = 0;
     this.map = new Map(size);
     this.enemies = [];
@@ -40,7 +41,8 @@ var Gameworld = function (size) {
         if (this.lastPlayedTime != null) {
             //run until we catch up or until the base is destroyed
             var d = new Date();
-            console.log("its been " + (d.getTime() - this.lastPlayedTime)/ 1000 + " seconds since you last played");
+            console.log("its been " + (d.getTime() - this.lastPlayedTime) / 1000 + " seconds since you last played");
+            this.catchUpToNow(this.lastPlayedTime, tstep);
         }
         this.update(c, tstep);
         this.running = setInterval("RunCurrentGameWorld()", tstep);
@@ -56,8 +58,15 @@ var Gameworld = function (size) {
         else { console.log("ERROR: This game was not running but tried to stop"); }
     };
 
-    this.catchUpToNow = function (curTime, tstep) {
-        // toooooodoooooo
+    this.catchUpToNow = function (curGameTime, tstep) {
+        console.log("catchin up....");
+        var d = new Date();
+        var startTime = d.getTime();
+        while (curGameTime < d.getTime() && !this.lost) {
+            this.updateUnits(tstep);
+            curGameTime += tstep;
+        }
+        console.log("caught up! it took " + (startTime - d.getTime()) / 1000 + " seconds");
     };
 
     this.updateUnits = function (tstep) {
@@ -68,16 +77,16 @@ var Gameworld = function (size) {
         var r = Math.pow(.999, Math.log(this.depth + 1));
         //console.log(r);
         if ( Math.random() > r) {
-            var tx = 0;
-            var ty = 0;
-            if (this.miner.x < .5 * TILESIZE * this.map.size) {
-                tx = TILESIZE * this.map.size;
+            var tx = Math.random() * TILESIZE * this.map.size;
+            var ty = Math.random() * TILESIZE * this.map.size;
+            if (Math.abs(this.miner.x, tx) > Math.abs(this.miner.y, ty)) {
+                tx = 0;
             }
-            if (this.miner.y < .5 * TILESIZE * this.map.size) {
-                ty = TILESIZE * this.map.size;
+            else {
+                ty = 0;
             }
 
-            console.log("spawned enemy! " + tx + "," + ty);
+            //console.log("spawned enemy! " + tx + "," + ty);
             this.enemies.push(new Enemy(tx, ty));
         }
         for (var e in this.enemies) {
@@ -117,7 +126,6 @@ var Gameworld = function (size) {
                 this.enemies.splice(e, 1);
             }
         }
-
 
         // miner
         this.depth = this.miner.update(tstep);

@@ -9,8 +9,15 @@ var stationDiv;
 var gameworldDiv;
 var interfaceDivs = [];
 
-var gameworldListDiv;
+//station view divs
+var gameworldListDiv; //should rename to stationGameworldListDiv
+var stationMoneyDiv;
+var stationDetailsDiv;
+
+//gameworld view divs
 var selectedDiv;
+
+
 
 var minerMoneyDiv;
 var minerHealthDiv;
@@ -47,6 +54,7 @@ var playWorld = function (event) {
 
 var goToActionState = function (event) {
     selectedDiv.innerHTML = "";
+    selectedDiv.innerText = "depth: " + curPlayer.gameworlds[curPlayer.playing].depth;
     if (event != null) {
         if (event.target.id == "build-btn") {
             //console.log("time to build stuff!");
@@ -71,18 +79,21 @@ var goToActionState = function (event) {
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
         gameworldCancelButton.style.display = "block";
         buildButton.style.display = "block";
-
+        var curmoney = curPlayer.gameworlds[curPlayer.playing].miner.money;
         //add in the info of the selected unit!
         var temp = curPlayer.gameworlds[curPlayer.playing].selected;
         for (var k in temp.upgradable) {
+            var cost = 25 * Math.pow(2, temp[temp.upgradable[k]]);
             var newdiv = document.createElement("div");
-            newdiv.innerText = temp.upgradable[k] + ": " + temp[temp.upgradable[k]];
+            newdiv.innerText = temp.upgradable[k] + ": " + temp[temp.upgradable[k]] + " cost: " + cost;
             var newbtn = document.createElement("button");
             newbtn.innerText = "+";
             newbtn.id = "upgrade-btn-" + k;
             newbtn.name = temp.upgradable[k];
             newbtn.addEventListener("click", upgradeController);
-            newdiv.appendChild(newbtn);
+            if (curmoney >= cost) {
+                newdiv.appendChild(newbtn);
+            }
             selectedDiv.appendChild(newdiv);
         }
         // we need to make little divs for displaying and upgrading
@@ -94,31 +105,24 @@ var goToActionState = function (event) {
         buildButton.style.display = "none";
     }
 }
-
+var runningStation = 0;
 var goToView = function (view) {
     //hide all divs
     for (var k in interfaceDivs) {
         interfaceDivs[k].style.display = "none";
     }
+    //stop the station update if we are leaving the station view
+    if (view != "station") {
+        clearInterval(runningStation);
+    }
+
     if (view == null || view == "welcome") {
         welcomeDiv.style.display = "block";
     }
     else if(view == "station") {
         stationDiv.style.display = "block";
         if (curPlayer) {
-            //display the active games
-            gameworldListDiv.innerHTML = "";
-            for (var k in curPlayer.gameworlds) {
-                var newdiv = document.createElement("div");
-                newdiv.textContent = "World " + k + " ";
-                var newbtn = document.createElement("button");
-                newbtn.value = k;
-                newbtn.textContent = "Play";
-                newbtn.id = "play-world-" + k;
-                newbtn.addEventListener("click", playWorld);
-                newdiv.appendChild(newbtn);
-                gameworldListDiv.appendChild(newdiv);
-            }
+            runningStation = setInterval("RunCurrentStation()", tstep);
         }
     }
     else if (view == "gameworld") {
@@ -135,7 +139,8 @@ var goToView = function (view) {
         }
     }
 }
-
+var uiupdatecounter = 0;
+//update function for current game world
 var RunCurrentGameWorld = function () {
     curPlayer.gameworlds[curPlayer.playing].update(worldView, tstep);
     minerHealthProg.max = curPlayer.gameworlds[curPlayer.playing].miner.getMaxHealth();
@@ -145,6 +150,47 @@ var RunCurrentGameWorld = function () {
 
     minerHealthDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.curHP;
     minerMoneyDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.money;
+
+    var cost = 100 * (curPlayer.gameworlds[curPlayer.playing].turrets.length + 1);
+    buildButton.innerText = "Build Turret for " + cost;
+
+    uiupdatecounter++;
+    if (uiupdatecounter > 100) {
+        uiupdatecounter = 0;
+        goToActionState();
+    }
+}
+
+var RunCurrentStation = function () {
+    //display station money and details
+    stationMoneyDiv.innerText = "Money: " + curPlayer.money;
+    stationDetailsDiv.innerText = "Upgrades: ";
+
+    uiupdatecounter++;
+    if (uiupdatecounter > 100) {
+        uiupdatecounter = 0;
+        //display the active games
+        gameworldListDiv.innerHTML = "";
+        for (var k in curPlayer.gameworlds) {
+            if (curPlayer.gameworlds[k].miner.moneyTransfered > 0) {
+                //console.log("world had " + curPlayer.gameworlds[k].miner.moneyTransfered + " money");
+                curPlayer.money += curPlayer.gameworlds[k].miner.moneyTransfered;
+                curPlayer.gameworlds[k].miner.moneyTransfered = 0;
+            }
+            if (curPlayer.gameworlds[k].lost) {
+                continue;
+            }
+            var newdiv = document.createElement("div");
+            newdiv.textContent = "World " + k + " ";
+            var newbtn = document.createElement("button");
+            newbtn.value = k;
+            newbtn.textContent = "Play";
+            newbtn.id = "play-world-" + k;
+            newbtn.addEventListener("click", playWorld);
+            newdiv.appendChild(newbtn);
+            gameworldListDiv.appendChild(newdiv);
+        }
+    }
 }
 
 var init = function () {
@@ -154,9 +200,14 @@ var init = function () {
     stationDiv = document.getElementById("station-div");
     gameworldDiv = document.getElementById("gameworld-div");
     interfaceDivs.push(welcomeDiv, stationDiv, gameworldDiv);
+    
+    //station view elements
     gameworldListDiv = document.getElementById("gameworld-list-div");
-    selectedDiv = document.getElementById("selected-div");
+    stationMoneyDiv = document.getElementById("station-money-div");
+    stationDetailsDiv = document.getElementById("station-details-div");
 
+    //gameworld view elements
+    selectedDiv = document.getElementById("selected-div");
     minerMoneyDiv = document.getElementById("miner-money-div");
     minerHealthDiv = document.getElementById("miner-health-div");
     minerMoneyProg = document.getElementById("miner-money-prog");
@@ -197,7 +248,12 @@ var init = function () {
 
 var upgradeController = function (event) {
     console.log("upgrade: " + event.target.name);
-    curPlayer.gameworlds[curPlayer.playing].selected[event.target.name]++;
+    var curlevel = curPlayer.gameworlds[curPlayer.playing].selected[event.target.name];
+    var cost = 25 * Math.pow(2, curlevel);
+    if (curPlayer.gameworlds[curPlayer.playing].miner.money >= cost) {
+        curPlayer.gameworlds[curPlayer.playing].miner.money -= cost;
+        curPlayer.gameworlds[curPlayer.playing].selected[event.target.name]++;
+    }
     goToActionState();
 }
 
@@ -224,11 +280,12 @@ var clickController = function (event) {
 
     else if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.BUILDING) {
         //check if there are enough resources to place a turret!
-        if (curPlayer.gameworlds[curPlayer.playing].miner.money >= 100) {
+        var cost = 100 * (curPlayer.gameworlds[curPlayer.playing].turrets.length + 1);
+        if (curPlayer.gameworlds[curPlayer.playing].miner.money >= cost) {
             //check if it collides with anything!
             if (curPlayer.gameworlds[curPlayer.playing].checkClickCollision(curPlayer.gameworlds[curPlayer.playing].building) == null) {
                 curPlayer.gameworlds[curPlayer.playing].turrets.push(new Turret(click.x, click.y));
-                curPlayer.gameworlds[curPlayer.playing].miner.money -= 100;
+                curPlayer.gameworlds[curPlayer.playing].miner.money -= cost;
             }
             else {
                 console.log("turret overlaps! can't build!");

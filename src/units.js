@@ -125,6 +125,7 @@ var Miner = function (x, y) {
     this.level = 0;
     this.curHP = 100;
     this.money = 0;
+    this.moneyTransfered = 0;
 
     // CORE STAT LEVELS
     this.speed = 1; // how fast it mines minerals
@@ -137,6 +138,7 @@ var Miner = function (x, y) {
 
     this.miningDepth = 1;
     this.curMiningProgress = 0;
+    this.curTransferProgress = 0;
 
     // AUGMENT SLOT
     this.augment = null;
@@ -152,7 +154,7 @@ var Miner = function (x, y) {
         c.drawCircle("gray", this.radius, this.x, this.y);
     };
     this.getMaxMoney = function () {
-        return 1000 * Math.pow(1.1, this.storage);
+        return 100 * Math.pow(2, this.storage);
     };
     this.getMaxHealth = function () {
         return 100 * Math.pow(1.1, this.health);
@@ -166,13 +168,23 @@ var Miner = function (x, y) {
         }
         // if we have space for more money
         if (this.money < this.getMaxMoney()) {
-            this.curMiningProgress += tstep * Math.pow(1.1, this.speed);
+            this.curMiningProgress += tstep * Math.pow(2, this.speed);
         }
         if (this.curMiningProgress > this.miningDepth) {
             this.curMiningProgress -= this.miningDepth;
             this.miningDepth++;
             this.money += 1;
         }
+
+        this.curTransferProgress++;
+        if (this.money > 0 && this.curTransferProgress > 100) {
+            //transfer some money
+            var amt = .5 * Math.pow(2, this.transfer);
+            this.moneyTransfered += amt;
+            this.money -= amt;
+            this.curTransferProgress = 0;
+        }
+
         return this.miningDepth;
     }
 }
