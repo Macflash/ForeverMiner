@@ -195,6 +195,7 @@ var RunCurrentStation = function () {
             if (curPlayer.gameworlds[k].miner.moneyTransfered > 0) {
                 //console.log("world had " + curPlayer.gameworlds[k].miner.moneyTransfered + " money");
                 curPlayer.money += curPlayer.gameworlds[k].miner.moneyTransfered;
+                curPlayer.gameworlds[k].totalTransferred += curPlayer.gameworlds[k].miner.moneyTransfered;
                 curPlayer.gameworlds[k].miner.moneyTransfered = 0;
             }
             if (curPlayer.gameworlds[k].lost) {
@@ -202,7 +203,7 @@ var RunCurrentStation = function () {
             }
 
             var newdiv = document.createElement("div");
-            newdiv.textContent = "World " + k + " ";
+            newdiv.innerHTML = "World " + k + "<br> Depth: " + curPlayer.gameworlds[k].depth + " amt earned: " + curPlayer.gameworlds[k].totalTransferred + "<br>";
             var newbtn = document.createElement("button");
             newbtn.value = k;
             newbtn.textContent = "Play";

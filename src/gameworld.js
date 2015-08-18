@@ -21,6 +21,7 @@ var Map = function (size) {
 
 var Gameworld = function (size) {
     this.moneyToTransfer = 0;
+    this.totalTransferred = 0;
     this.currentTime = 0;
     this.map = new Map(size);
     this.enemies = [];
@@ -33,7 +34,8 @@ var Gameworld = function (size) {
     this.building = null;
     this.selected = null;
     this.lost = false;
-    this.depth = 0;
+    this.depth = 1;
+    this.spawnCounter = 0;
 
     //place miner somewhere
     this.miner = new Miner(Math.random() * size * TILESIZE, Math.random() * size * TILESIZE);
@@ -68,33 +70,100 @@ var Gameworld = function (size) {
         }
         //console.log("caught up! it took " + (startTime - d.getTime()) / 1000 + " seconds");
     };
+    
+    this.getQuadrant = function (ix, iy) {
+        var wh = TILESIZE * this.map.size;
+        var x = ix - wh / 2;
+        var y = iy - wh / 2;
+        if (x < 0) {
+            if (y < 0) { return 1; }
+            else { return 2; }
+        }
+        else {
+            if (y < 0) { return 3; }
+            else { return 4; }
+        }
+    }
+
+    this.spawnEnemy = function () {
+        var wh = TILESIZE * this.map.size;
+        var tx = Math.random() * wh;
+        var ty = Math.random() * wh;
+        // if the miner is near the center 1/3 all sides are fair game
+        if (Dist(this.miner, { x: wh / 2, y: wh / 2 }) < (wh / 4)) {
+            console.log("middle mode!")
+            if (Math.random() > .5) {
+                if (Math.random() > .5) {
+                    tx = 0;
+                }
+                else {
+                    tx = wh;
+                }
+            }
+            else {
+                if (Math.random() > .5) {
+                    ty = 0;
+                }
+                else {
+                    ty = wh;
+                }
+            }
+            this.enemies.push(new Enemy(tx, ty));
+        }
+        else {
+            // make sure the enemy doesn't spawn in the same quadrant
+            if (this.getQuadrant(tx, ty) == this.getQuadrant(this.miner.x, this.miner.y)) {
+                this.spawnEnemy();
+            }
+            else {
+                var oldx = tx;
+                var oldy = ty;
+                //push it randomly out to a side, and make sure its still in the same quadrant
+                if (Math.random() > .5) {
+                    if (Math.random() > .5) {
+                        tx = 0;
+                    }
+                    else {
+                        tx = wh;
+                    }
+                }
+                else {
+                    if (Math.random() > .5) {
+                        ty = 0;
+                    }
+                    else {
+                        ty = wh;
+                    }
+                }
+                if (this.getQuadrant(tx, ty) != this.getQuadrant(oldx, oldy)) {
+                    this.spawnEnemy();
+                }
+                else {
+                    this.enemies.push(new Enemy(tx, ty));
+                }
+            }
+        }
+    }
 
     this.updateUnits = function (tstep) {
         //go through all the units and call their update functions
 
         // enemies
         // spawn chance is like depth / 1000000 kind of...
-        var r = Math.pow(.999, Math.log(this.depth + 1));
-        //console.log(r);
-        if ( Math.random() > r) {
-            var tx = Math.random() * TILESIZE * this.map.size;
-            var ty = Math.random() * TILESIZE * this.map.size;
-            if (Math.abs(this.miner.x, tx) > Math.abs(this.miner.y, ty)) {
-                tx = 0;
-            }
-            else {
-                ty = 0;
-            }
+        this.spawnCounter += Math.random() * Math.log(this.depth);
 
-            //console.log("spawned enemy! " + tx + "," + ty);
-            this.enemies.push(new Enemy(tx, ty));
+        //console.log(r);
+        if (this.spawnCounter > 1000) {
+            this.spawnCounter = 0;
+            this.spawnEnemy();
         }
+
         for (var e in this.enemies) {
             this.enemies[e].update(tstep, this.miner);
         }
         // turrets
         for (var t in this.turrets) {
-            var bullet = this.turrets[t].update(tstep, this.enemies);
+            var bullet = this.turrets[t].update(tstep, this.enemies, this.miner);
             if (bullet != null) {
                 this.projectiles.push(bullet);
             }
@@ -132,7 +201,8 @@ var Gameworld = function (size) {
 
                     //check if the enemy is dead
                     if (this.enemies[e].curHP <= 0) {
-                        this.enemies.splice(e,1);
+                        this.enemies.splice(e, 1);
+                        this.miner.money += 5; // this should be adjusted somewhere
                     }
 
                     break;

@@ -89,7 +89,7 @@ var Turret = function (x, y) {
     }
 
     this.getMaxShotCounter = function () {
-        return (500 * Math.pow(1.01, this.damage)) / Math.pow(1.1, this.speed);
+        return (500 * Math.pow(1.01, this.damage)) / Math.pow(1.2, this.speed);
     }
 
     this.draw = function (c) {
@@ -99,25 +99,34 @@ var Turret = function (x, y) {
         c.drawCircle("green", this.radius, this.x, this.y);
     }
 
-    this.update = function (tstep, enemies) {
+    this.update = function (tstep, enemies, miner) {
         //increment shot timer
         this.curShotCounter += tstep;
         if (this.curShotCounter > this.getMaxShotCounter()) {
             //shoot at first enemy!
+            var closestToMiner = null;
+            var mindist = 100000;
             for (var e in enemies) {
                 if (Dist(this, enemies[e]) < this.getMaxRange()) {
-                    this.curShotCounter = 0;
-                    this.dir = DirToTarget(this, enemies[e]);
-                    var noise = Math.random() - .5;
-                    noise *= .3;
-                    noise /= Math.pow(.9, this.precision);
-                    var bdir = this.dir + noise;
-                    var bullet = new Projectile(this.x, this.y, bdir);
-                    bullet.damage = Math.pow(1.2, this.damage);
-                    bullet.splash = this.splash;
-                    bullet.speed = Math.pow(1.01, this.precision);
-                    return bullet;
+                    var d = Dist(miner, enemies[e]);
+                    if (d < mindist) {
+                        closestToMiner = enemies[e];
+                        mindist = d;
+                    }
                 }
+            }
+            if (closestToMiner != null) {
+                this.curShotCounter = 0;
+                this.dir = DirToTarget(this, closestToMiner);
+                var noise = Math.random() - .5;
+                noise *= .3;
+                noise /= Math.pow(.9, this.precision);
+                var bdir = this.dir + noise;
+                var bullet = new Projectile(this.x, this.y, bdir);
+                bullet.damage = Math.pow(1.2, this.damage);
+                bullet.splash = this.splash;
+                bullet.speed = Math.pow(1.1, this.precision);
+                return bullet;
             }
         }
         return null;
