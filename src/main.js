@@ -39,6 +39,9 @@ var worldView;
 var targetFrameRate = 60;
 var tstep = 1000 / targetFrameRate;
 
+
+var uiupdatecounter = 0;
+
 /* ------------------------------
             USER INFORMATION
    ------------------------------ */
@@ -53,8 +56,12 @@ var playWorld = function (event) {
 }
 
 var goToActionState = function (event) {
+    if (runningStation) {
+        clearInterval(runningStation);
+        runningStation = 0;
+    }
     selectedDiv.innerHTML = "";
-    selectedDiv.innerText = "depth: " + curPlayer.gameworlds[curPlayer.playing].depth;
+    selectedDiv.textContent = "depth: " + curPlayer.gameworlds[curPlayer.playing].depth;
     if (event != null) {
         if (event.target.id == "build-btn") {
             //console.log("time to build stuff!");
@@ -85,9 +92,9 @@ var goToActionState = function (event) {
         for (var k in temp.upgradable) {
             var cost = 25 * Math.pow(2, temp[temp.upgradable[k]]);
             var newdiv = document.createElement("div");
-            newdiv.innerText = temp.upgradable[k] + ": " + temp[temp.upgradable[k]] + " cost: " + cost;
+            newdiv.textContent = temp.upgradable[k] + ": " + temp[temp.upgradable[k]] + " cost: " + cost;
             var newbtn = document.createElement("button");
-            newbtn.innerText = "+";
+            newbtn.textContent = "+";
             newbtn.id = "upgrade-btn-" + k;
             newbtn.name = temp.upgradable[k];
             newbtn.addEventListener("click", upgradeController);
@@ -107,6 +114,7 @@ var goToActionState = function (event) {
 }
 var runningStation = 0;
 var goToView = function (view) {
+    uiupdatecounter = 1000;
     //hide all divs
     for (var k in interfaceDivs) {
         interfaceDivs[k].style.display = "none";
@@ -114,6 +122,7 @@ var goToView = function (view) {
     //stop the station update if we are leaving the station view
     if (view != "station") {
         clearInterval(runningStation);
+        runningStation = 0;
     }
 
     if (view == null || view == "welcome") {
@@ -121,8 +130,11 @@ var goToView = function (view) {
     }
     else if(view == "station") {
         stationDiv.style.display = "block";
-        if (curPlayer) {
+        if (curPlayer && !runningStation) {
             runningStation = setInterval("RunCurrentStation()", tstep);
+        }
+        else if (curPlayer) {
+            console.log("ERROR: station was already running!!");
         }
     }
     else if (view == "gameworld") {
@@ -132,6 +144,10 @@ var goToView = function (view) {
         if (curPlayer.playing != null) {
             console.log("should play game " + curPlayer.playing);
             curPlayer.gameworlds[curPlayer.playing].startPlaying(worldView, tstep);
+            if (runningStation) {
+                clearInterval(runningStation);
+                runningStation = 0;
+            }
         }
         else {
             console.log("ERROR: we aren't playing a game! -> back to the station!");
@@ -139,7 +155,6 @@ var goToView = function (view) {
         }
     }
 }
-var uiupdatecounter = 0;
 //update function for current game world
 var RunCurrentGameWorld = function () {
     curPlayer.gameworlds[curPlayer.playing].update(worldView, tstep);
@@ -152,19 +167,24 @@ var RunCurrentGameWorld = function () {
     minerMoneyDiv.innerHTML = curPlayer.gameworlds[curPlayer.playing].miner.money;
 
     var cost = 100 * (curPlayer.gameworlds[curPlayer.playing].turrets.length + 1);
-    buildButton.innerText = "Build Turret for " + cost;
+    buildButton.textContent = "Build Turret for " + cost;
 
     uiupdatecounter++;
-    if (uiupdatecounter > 100) {
+    if (uiupdatecounter > 50) {
         uiupdatecounter = 0;
         goToActionState();
     }
 }
 
 var RunCurrentStation = function () {
+    //console.log("running station");
     //display station money and details
-    stationMoneyDiv.innerText = "Money: " + curPlayer.money;
-    stationDetailsDiv.innerText = "Upgrades: ";
+    stationMoneyDiv.textContent = "Money: " + curPlayer.money;
+    stationDetailsDiv.textContent = "Upgrades: ";
+    var time = new Date().getTime();
+    for (var k in curPlayer.gameworlds) {
+        curPlayer.gameworlds[k].catchUpToNow(time, tstep);
+    }
 
     uiupdatecounter++;
     if (uiupdatecounter > 100) {
@@ -180,6 +200,7 @@ var RunCurrentStation = function () {
             if (curPlayer.gameworlds[k].lost) {
                 continue;
             }
+
             var newdiv = document.createElement("div");
             newdiv.textContent = "World " + k + " ";
             var newbtn = document.createElement("button");
@@ -228,7 +249,11 @@ var init = function () {
     backToMenuButton.onclick = function () { goToView("welcome") };
     backToStationButton.onclick = function () { curPlayer.gameworlds[curPlayer.playing].stopPlaying(); curPlayer.playing = null; goToView("station"); };
     startNewWorldButton.onclick = function () {
-        if (curPlayer) { curPlayer.gameworlds.push(new Gameworld(15)); goToView("station"); }
+        if (curPlayer) {
+            curPlayer.gameworlds.push(new Gameworld(15));
+            curPlayer.playing = curPlayer.gameworlds.length - 1;
+            goToView("gameworld");
+        }
         else { alert("no player!");}
     };
     buildButton.addEventListener("click", goToActionState);
@@ -260,7 +285,7 @@ var upgradeController = function (event) {
 var clickController = function (event) {
     var click = { x: (event.x - event.target.offsetLeft), y: (event.y - event.target.offsetTop), radius: 0 };
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE || curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
-        console.log("tried to select unit");
+        //console.log("tried to select unit");
         // go through and see if we clicked on any units!
         var clicked = curPlayer.gameworlds[curPlayer.playing].checkClickCollision(click);
         //console.log(clicked);
@@ -271,7 +296,7 @@ var clickController = function (event) {
             goToActionState();
         }
         else {
-            console.log("tried to unselect a unit");
+            //console.log("tried to unselect a unit");
             curPlayer.gameworlds[curPlayer.playing].actionState = ActionState.NONE;
             curPlayer.gameworlds[curPlayer.playing].selected = null;
             goToActionState();

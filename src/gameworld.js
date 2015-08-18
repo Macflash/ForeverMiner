@@ -8,6 +8,7 @@ var Map = function (size) {
     this.size = size;
     for (var i = 0; i < size; i++) {
         this.tiles[i] = [];
+
     }
     this.draw = function (c) {
         for (var i = 0; i < this.size; i++) {
@@ -25,6 +26,7 @@ var Gameworld = function (size) {
     this.enemies = [];
     this.turrets = [];
     this.projectiles = [];
+    this.explosions = [];
     this.running = 0;
     this.lastPlayedTime = null;
     this.actionState = ActionState.NONE;
@@ -42,7 +44,7 @@ var Gameworld = function (size) {
             //run until we catch up or until the base is destroyed
             var d = new Date();
             console.log("its been " + (d.getTime() - this.lastPlayedTime) / 1000 + " seconds since you last played");
-            this.catchUpToNow(this.lastPlayedTime, tstep);
+            this.catchUpToNow(d.getTime(), tstep);
         }
         this.update(c, tstep);
         this.running = setInterval("RunCurrentGameWorld()", tstep);
@@ -59,14 +61,12 @@ var Gameworld = function (size) {
     };
 
     this.catchUpToNow = function (curGameTime, tstep) {
-        console.log("catchin up....");
-        var d = new Date();
-        var startTime = d.getTime();
-        while (curGameTime < d.getTime() && !this.lost) {
+        //console.log("catchin up....");
+        while (this.lastPlayedTime < curGameTime && !this.lost) {
             this.updateUnits(tstep);
-            curGameTime += tstep;
+            this.lastPlayedTime += tstep;
         }
-        console.log("caught up! it took " + (startTime - d.getTime()) / 1000 + " seconds");
+        //console.log("caught up! it took " + (startTime - d.getTime()) / 1000 + " seconds");
     };
 
     this.updateUnits = function (tstep) {
@@ -104,23 +104,52 @@ var Gameworld = function (size) {
             this.projectiles[p].update(tstep);
         }
 
+        for (var e in this.explosions) {
+            this.explosions[e].update(tstep);
+
+            //remove the explosion if it is done playing its animation
+            if(this.explosions[e].donePlaying){
+                this.explosions.splice(e,1);
+            }
+        }
+
         // check collisions!
         for (var p in this.projectiles) {
             for (var e in this.enemies) {
                 if (Collision(this.projectiles[p], this.enemies[e])) {
-                    //console.log("collision!" + this.enemies[e].curHP);
+                    //we had a bullet hit an enemy!
+                    //check if we should spawn a splash particle!?
+                    if (this.projectiles[p].splash > 0) {
+                        var expl = this.projectiles[p].makeExplosion();
+                        expl.firstHit = this.enemies[e];
+                        this.explosions.push(expl);
+                    }
+
                     this.enemies[e].curHP -= this.projectiles[p].damage;
+
+                    //remove the projectile
                     this.projectiles.splice(p, 1);
+
+                    //check if the enemy is dead
                     if (this.enemies[e].curHP <= 0) {
-                        //console.log("dead!");
                         this.enemies.splice(e,1);
                     }
+
                     break;
                 }
             }
         }
 
         for (var e in this.enemies) {
+            for (var b in this.explosions) {
+                if(this.explosions[b].exploded || this.explosions[b].firstHit == this.enemies[e]){continue;}
+                else if(Collision(this.enemies[e], this.explosions[b])){
+                    //do damage!
+                    // todo, actually make each unit handle taking and calculating damage!
+                    this.enemies[e].curHP -= this.explosions[b].damage;
+                }
+            }
+
             if (Collision(this.miner, this.enemies[e])) {
                 this.miner.curHP -= this.enemies[e].damage * 10;
                 this.enemies.splice(e, 1);
@@ -152,14 +181,12 @@ var Gameworld = function (size) {
         //draw map
         this.map.draw(c);
 
-        //draw units
-        this.drawUnits(c, this.turrets);
-
         //draw the miner
         this.miner.draw(c);
-        
-        this.drawUnits(c, this.enemies);
 
+        this.drawUnits(c, this.turrets);
+        this.drawUnits(c, this.explosions);
+        this.drawUnits(c, this.enemies);
         this.drawUnits(c, this.projectiles);
 
         // draw whats being built
