@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
   <title>ForeverMiner</title>
   <link rel="stylesheet" type="text/css" href="src/main.css">
@@ -8,51 +9,58 @@
   <script type="text/javascript" src="src/player.js"></script>
   <script type="text/javascript" src="src/main.js"></script>
 </head>
+
 <body onload="init()">
   <div id="welcome-div">
-    Welcome to ForeverMiner. Check back for updates!<br>
-    <input type="button" value="PLAY!" id="play-btn"/>
+    Welcome to ForeverMiner.<br>
+    <input type="button" value="PLAY!" id="play-btn" />
     <input type="button" value="CLEAR DATA" id="clear-btn" />
   </div>
-  <div id="station-div" style="clear:both;">
-    <div style="float:left;">
-      This is your station. <br>
-      <input type="button" value="Back to Menu" id="back-to-menu-btn" /><br>
-      <div id="station-money-div"></div><br>
-      <div id="station-details-div"></div><br>
-    </div>
-    <div style="float:left;">
-      Active Worlds: <br>
-      <div id="gameworld-list-div"></div>
-      <input type="button" value="Start New World" id="start-new-world-btn" />
-    </div>
-  </div>
-  <div id="gameworld-div" style="clear:both;">
-    This is the current gameworld. <br>
-    
-    <div style="float:left;">
-      Miner: <br>
-      Cash: <div id="miner-money-div"></div><progress id="miner-money-prog"></progress><br>
-      HP: <div id="miner-health-div"></div><progress id="miner-health-prog"></progress><br>
-      <br>
-      
-      Controls: <br>
-      <div id="gameworld-controls-div">
-        <button id="build-btn">Build</button>
-        <button id="gameworld-cancel-btn">Cancel</button>
-        <input type="button" value="Back to Station" id="back-to-station-btn" />
+  <div id="station-div">
+    <div style="display:flex;">
+      <div>
+        This is your station. <br>
+        <input type="button" value="Back to Menu" id="back-to-menu-btn" /><br>
+        <div id="station-money-div"></div><br>
+        <div id="station-details-div"></div><br>
+      </div>
+      <div style="flex: auto;">
+        Active Worlds: <br>
+        <div id="gameworld-list-div"></div>
+        <input type="button" value="Start New World" id="start-new-world-btn" />
       </div>
     </div>
     
-    <div style="float:left;">
-    <canvas id="gameworld-canvas" tabindex="1" width="400" height="400"></canvas>
+  </div>
+  <div id="gameworld-div">
+    <div>
+      This is the current gameworld. <br>
     </div>
     
-    <div style-="float:left;">
-      Selected: <br>
-      <div id="selected-div"></div><br>
-      <br>
+    <div style="display:flex;">
+      <div style="float:left;">
+        Miner: <br>
+        Cash: <div id="miner-money-div"></div><progress id="miner-money-prog"></progress><br>
+        HP: <div id="miner-health-div"></div><progress id="miner-health-prog"></progress><br>
+        <br>
+  
+        Controls: <br>
+        <div id="gameworld-controls-div">
+          <button id="build-btn">Build</button>
+          <button id="gameworld-cancel-btn">Cancel</button>
+          <input type="button" value="Back to Station" id="back-to-station-btn" />
+        </div>
+      </div>
+  
+      <div style="float:left;">
+        <canvas id="gameworld-canvas" tabindex="1" width="400" height="400"></canvas>
+      </div>
+  
+      <div style-="float:left;">
+        Selected: <br>
+        <div id="selected-div"></div><br>
+        <br>
+      </div>
     </div>
-    
   </div>
 </body>

@@ -47,7 +47,7 @@ var uiupdatecounter = 0;
    ------------------------------ */
 var curPlayer;
 
-var playWorld = function (event) {
+function playWorld(event) {
     //console.log(event.target.value);
     curPlayer.playing = event.target.value;
     goToView("gameworld");
@@ -55,7 +55,7 @@ var playWorld = function (event) {
     //alert("want to play world " + event);
 }
 
-var goToActionState = function (event) {
+function goToActionState(event) {
     if (runningStation) {
         clearInterval(runningStation);
         runningStation = 0;
@@ -112,8 +112,14 @@ var goToActionState = function (event) {
         buildButton.style.display = "none";
     }
 }
+
 var runningStation = 0;
-var goToView = function (view) {
+function goToView(view) {
+    // save when switching views
+    if(curPlayer){
+        Player.saveData(curPlayer);
+    }
+
     uiupdatecounter = 1000;
     //hide all divs
     for (var k in interfaceDivs) {
@@ -128,7 +134,7 @@ var goToView = function (view) {
     if (view == null || view == "welcome") {
         welcomeDiv.style.display = "block";
     }
-    else if(view == "station") {
+    else if (view == "station") {
         stationDiv.style.display = "block";
         if (curPlayer && !runningStation) {
             runningStation = setInterval("RunCurrentStation()", tstep);
@@ -144,10 +150,7 @@ var goToView = function (view) {
         if (curPlayer.playing != null) {
             console.log("should play game " + curPlayer.playing);
             curPlayer.gameworlds[curPlayer.playing].startPlaying(worldView, tstep);
-            if (runningStation) {
-                clearInterval(runningStation);
-                runningStation = 0;
-            }
+
         }
         else {
             console.log("ERROR: we aren't playing a game! -> back to the station!");
@@ -215,14 +218,14 @@ var RunCurrentStation = function () {
     }
 }
 
-var init = function () {
+function init () {
     // Connect Interface Elements
     // Divs
     welcomeDiv = document.getElementById("welcome-div");
     stationDiv = document.getElementById("station-div");
     gameworldDiv = document.getElementById("gameworld-div");
     interfaceDivs.push(welcomeDiv, stationDiv, gameworldDiv);
-    
+
     //station view elements
     gameworldListDiv = document.getElementById("gameworld-list-div");
     stationMoneyDiv = document.getElementById("station-money-div");
@@ -245,7 +248,7 @@ var init = function () {
     buildButton = document.getElementById("build-btn");
 
     // Button Clicks
-    clearButton.onclick = function () { curPlayer = new Player(); goToView();}
+    clearButton.onclick = function () { curPlayer = new Player(); goToView(); }
     playButton.onclick = function () { goToView("station") };
     backToMenuButton.onclick = function () { goToView("welcome") };
     backToStationButton.onclick = function () { curPlayer.gameworlds[curPlayer.playing].stopPlaying(); curPlayer.playing = null; goToView("station"); };
@@ -255,7 +258,7 @@ var init = function () {
             curPlayer.playing = curPlayer.gameworlds.length - 1;
             goToView("gameworld");
         }
-        else { alert("no player!");}
+        else { alert("no player!"); }
     };
     buildButton.addEventListener("click", goToActionState);
     gameworldCancelButton.addEventListener("click", goToActionState);
@@ -265,14 +268,13 @@ var init = function () {
     canvas.addEventListener("click", clickController);
     canvas.addEventListener("mousemove", hoverController);
     var context = canvas.getContext("2d");
-    worldView = new worldView(1,200, 200, canvas, context);
+    worldView = new WorldView(1, 200, 200, canvas, context);
 
-    //this is where we would handle cookie stuff.... but for now lets ignore that!
+    curPlayer = Player.loadData() || new Player("Tom");
     goToView();
-    curPlayer = new Player("tom");
 }
 
-var upgradeController = function (event) {
+function upgradeController(event) {
     console.log("upgrade: " + event.target.name);
     var curlevel = curPlayer.gameworlds[curPlayer.playing].selected[event.target.name];
     var cost = 25 * Math.pow(2, curlevel);
@@ -283,7 +285,7 @@ var upgradeController = function (event) {
     goToActionState();
 }
 
-var clickController = function (event) {
+function clickController (event) {
     var click = { x: (event.x - event.target.offsetLeft), y: (event.y - event.target.offsetTop), radius: 0 };
     if (curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.NONE || curPlayer.gameworlds[curPlayer.playing].actionState == ActionState.SELECTED) {
         //console.log("tried to select unit");
@@ -326,7 +328,7 @@ var clickController = function (event) {
 // used for showing units before building
 var curMouseX = 0;
 var curMouseY = 0;
-var hoverController = function (event) {
+function hoverController (event) {
     curMouseX = event.x - event.target.offsetLeft;
     curMouseY = event.y - event.target.offsetTop;
     if (curPlayer.gameworlds[curPlayer.playing].building != null) {
